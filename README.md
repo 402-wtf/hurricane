@@ -1,4 +1,6 @@
-# Typhoon <img align="right" src="https://storage.googleapis.com/poseidon/typhoon-logo.png">
+# Hurricane <img align="right" src="https://user-images.githubusercontent.com/5100938/180940181-0067defc-cae1-4d7a-809b-96c742b9cf25.png">
+
+Hurricane is a fork of [Typhoon](https://github.com/poseidon/typhoon) for ephemeral bare-metal setups.
 
 Typhoon is a minimal and free Kubernetes distribution.
 
@@ -9,7 +11,7 @@ Typhoon is a minimal and free Kubernetes distribution.
 
 Typhoon distributes upstream Kubernetes, architectural conventions, and cluster addons, much like a GNU/Linux distribution provides the Linux kernel and userspace components.
 
-## Features <a href="https://www.cncf.io/certification/software-conformance/"><img align="right" src="https://storage.googleapis.com/poseidon/certified-kubernetes.png"></a>
+## Features
 
 * Kubernetes v1.24.3 (upstream)
 * Single or multi-master, [Calico](https://www.projectcalico.org/) or [Cilium](https://github.com/cilium/cilium) or [flannel](https://github.com/coreos/flannel) networking
