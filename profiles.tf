@@ -8,10 +8,10 @@ resource "matchbox_profile" "flatcar-install" {
   count = length(var.controllers) + length(var.workers)
   name  = format("%s-flatcar-install-%s", var.cluster_name, concat(var.controllers.*.name, var.workers.*.name)[count.index])
 
-  kernel = "${var.download_protocol}://${local.channel}.release.flatcar-linux.net/${concat(var.controllers.*.arch, var.workers.*.arch)[count.index]}/${var.os_version}-usr/${var.os_version}/flatcar_production_pxe.vmlinuz"
+  kernel = "${var.download_protocol}://${local.channel}.release.flatcar-linux.net/${concat(var.controllers.*.arch, var.workers.*.arch)[count.index]}-usr/${var.os_version}/flatcar_production_pxe.vmlinuz"
 
   initrd = [
-    "${var.download_protocol}://${local.channel}.release.flatcar-linux.net/${concat(var.controllers.*.arch, var.workers.*.arch)[count.index]}/${var.os_version}-usr/${var.os_version}/flatcar_production_pxe_image.cpio.gz",
+    "${var.download_protocol}://${local.channel}.release.flatcar-linux.net/${concat(var.controllers.*.arch, var.workers.*.arch)[count.index]}-usr/${var.os_version}/flatcar_production_pxe_image.cpio.gz",
   ]
 
   args = flatten([
