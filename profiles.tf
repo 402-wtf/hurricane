@@ -8,6 +8,7 @@ resource "matchbox_profile" "flatcar-install" {
   count = length(var.controllers) + length(var.workers)
   name  = format("%s-flatcar-install-%s", var.cluster_name, concat(var.controllers.*.name, var.workers.*.name)[count.index])
 
+  # https://flatcar-linux.org/docs/latest/installing/bare-metal/booting-with-ipxe/#setting-up-the-boot-script
   kernel = "${var.download_protocol}://${local.channel}.release.flatcar-linux.net/${concat(var.controllers.*.arch, var.workers.*.arch)[count.index]}-usr/${var.os_version}/flatcar_production_pxe.vmlinuz"
 
   initrd = [
@@ -16,14 +17,14 @@ resource "matchbox_profile" "flatcar-install" {
 
   args = flatten([
     "initrd=flatcar_production_pxe_image.cpio.gz",
-    "flatcar.config.url=${var.matchbox_http_endpoint}/ignition?uuid=$${uuid}&mac=$${mac:hexhyp}",
-    "flatcar.first_boot=yes",
+    "ignition.config.url=${var.matchbox_http_endpoint}/ignition?uuid=$${uuid}&mac=$${mac:hexhyp}",
+    "flatcar.first_boot=1",
     "console=tty0",
     "console=ttyS0",
     var.kernel_args,
   ])
 
-  container_linux_config = data.template_file.install-configs.*.rendered[count.index]
+  container_linux_config = concat(data.template_file.controller-configs.*.rendered, data.template_file.worker-configs.*.rendered)[count.index]
 }
 
 // Flatcar Linux Install profile (from matchbox /assets cache)
@@ -32,6 +33,7 @@ resource "matchbox_profile" "cached-flatcar-install" {
   count = length(var.controllers) + length(var.workers)
   name  = format("%s-cached-flatcar-linux-install-%s", var.cluster_name, concat(var.controllers.*.name, var.workers.*.name)[count.index])
 
+  # https://flatcar-linux.org/docs/latest/installing/bare-metal/booting-with-ipxe/#setting-up-the-boot-script
   kernel = "/assets/flatcar/${concat(var.controllers.*.arch, var.workers.*.arch)[count.index]}/${var.os_version}/flatcar_production_pxe.vmlinuz"
 
   initrd = [
@@ -40,54 +42,14 @@ resource "matchbox_profile" "cached-flatcar-install" {
 
   args = flatten([
     "initrd=flatcar_production_pxe_image.cpio.gz",
-    "flatcar.config.url=${var.matchbox_http_endpoint}/ignition?uuid=$${uuid}&mac=$${mac:hexhyp}",
-    "flatcar.first_boot=yes",
+    "ignition.config.url=${var.matchbox_http_endpoint}/ignition?uuid=$${uuid}&mac=$${mac:hexhyp}",
+    "flatcar.first_boot=1",
     "console=tty0",
     "console=ttyS0",
     var.kernel_args,
   ])
 
-  container_linux_config = data.template_file.cached-install-configs.*.rendered[count.index]
-}
-
-data "template_file" "install-configs" {
-  count = length(var.controllers) + length(var.workers)
-
-  template = file("${path.module}/cl/install.yaml")
-
-  vars = {
-    os_channel         = local.channel
-    os_version         = var.os_version
-    ignition_endpoint  = format("%s/ignition", var.matchbox_http_endpoint)
-    install_disk       = concat(var.controllers.*.install_disk, var.workers.*.install_disk)[count.index]
-    ssh_authorized_key = var.ssh_authorized_key
-    # only cached profile adds -b baseurl
-    baseurl_flag = ""
-  }
-}
-
-data "template_file" "cached-install-configs" {
-  count = length(var.controllers) + length(var.workers)
-
-  template = file("${path.module}/cl/install.yaml")
-
-  vars = {
-    os_channel         = local.channel
-    os_version         = var.os_version
-    ignition_endpoint  = format("%s/ignition", var.matchbox_http_endpoint)
-    install_disk       = concat(var.controllers.*.install_disk, var.workers.*.install_disk)[count.index]
-    ssh_authorized_key = var.ssh_authorized_key
-    # profile uses -b baseurl to install from matchbox cache
-    baseurl_flag = "-b ${var.matchbox_http_endpoint}/assets/flatcar/${concat(var.controllers.*.arch, var.workers.*.arch)[count.index]}"
-  }
-}
-
-
-// Kubernetes Controller profiles
-resource "matchbox_profile" "controllers" {
-  count        = length(var.controllers)
-  name         = format("%s-controller-%s", var.cluster_name, var.controllers.*.name[count.index])
-  raw_ignition = data.ct_config.controller-ignitions.*.rendered[count.index]
+  container_linux_config = concat(data.template_file.controller-configs.*.rendered, data.template_file.worker-configs.*.rendered)[count.index]
 }
 
 data "ct_config" "controller-ignitions" {
@@ -110,13 +72,6 @@ data "template_file" "controller-configs" {
     cluster_domain_suffix  = var.cluster_domain_suffix
     ssh_authorized_key     = var.ssh_authorized_key
   }
-}
-
-// Kubernetes Worker profiles
-resource "matchbox_profile" "workers" {
-  count        = length(var.workers)
-  name         = format("%s-worker-%s", var.cluster_name, var.workers.*.name[count.index])
-  raw_ignition = data.ct_config.worker-ignitions.*.rendered[count.index]
 }
 
 data "ct_config" "worker-ignitions" {

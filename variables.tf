@@ -22,7 +22,7 @@ variable "os_channel" {
 
 variable "os_version" {
   type        = string
-  description = "Version of Flatcar Linux to PXE and install (e.g. 2079.5.1)"
+  description = "Version of Flatcar Linux to PXE (e.g. 2079.5.1)"
 }
 
 # machines
@@ -33,11 +33,10 @@ variable "controllers" {
     mac    = string
     domain = string
     arch   = string
-    install_disk = string
   }))
   description = <<EOD
 List of controller machine details (unique name, identifying MAC address, FQDN)
-[{ name = "node1", mac = "52:54:00:a1:9c:ae", domain = "node1.example.com", arch = "amd64", install_disk = "/dev/sda"}]
+[{ name = "node1", mac = "52:54:00:a1:9c:ae", domain = "node1.example.com", arch = "amd64"}]
 EOD
 }
 
@@ -47,13 +46,12 @@ variable "workers" {
     mac    = string
     domain = string
     arch   = string
-    install_disk = string
   }))
   description = <<EOD
 List of worker machine details (unique name, identifying MAC address, FQDN)
 [
-  { name = "node2", mac = "52:54:00:b2:2f:86", domain = "node2.example.com", arch = "amd64", install_disk = "/dev/sda"},
-  { name = "node3", mac = "52:54:00:c3:61:77", domain = "node3.example.com", arch = "amd64", install_disk = "/dev/sda"}
+  { name = "node2", mac = "52:54:00:b2:2f:86", domain = "node2.example.com", arch = "amd64"},
+  { name = "node3", mac = "52:54:00:c3:61:77", domain = "node3.example.com", arch = "amd64"}
 ]
 EOD
 }
@@ -125,13 +123,13 @@ EOD
 
 variable "download_protocol" {
   type        = string
-  description = "Protocol iPXE should use to download the kernel and initrd. Defaults to https, which requires iPXE compiled with crypto support. Unused if cached_install is true."
+  description = "Protocol iPXE should use to download the kernel and initrd. Defaults to https, which requires iPXE compiled with crypto support. Unused if use_cache is true."
   default     = "https"
 }
 
-variable "cached_install" {
+variable "use_cache" {
   type        = bool
-  description = "Whether Flatcar Linux should PXE boot and install from matchbox /assets cache. Note that the admin must have downloaded the os_version into matchbox assets."
+  description = "Whether Flatcar Linux should PXE boot from matchbox /assets cache. Note that the admin must have downloaded the os_version into matchbox assets."
   default     = false
 }
 
