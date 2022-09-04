@@ -137,19 +137,13 @@ systemd:
         [Install]
         WantedBy=multi-user.target
     - name: bootstrap-layout.service
-      enabled: true
       contents: |
         [Unit]
         Description=Runs bootstrap-layout after startup
-        Wants=systemd-resolved.service
-        Before=kubelet.service
         [Service]
         Type=oneshot
         RemainAfterExit=true
         ExecStart=/bin/sh -c '/opt/bootstrap/layout'
-        [Install]
-        RequiredBy=kubelet.service
-        RequiredBy=etcd-member.service
     - name: bootstrap-layout.path
       enabled: true
       contents: |
@@ -157,16 +151,6 @@ systemd:
         Description=Wait for kubeconfig to be present before starting bootstrap-layout
         [Path]
         PathExists=/etc/kubernetes/kubeconfig
-        [Install]
-        WantedBy=multi-user.target
-    - name: bootstrap-layout.service
-      contents: |
-        [Unit]
-        Description=Start bootstrapping of the cluster
-        [Service]
-        Type=oneshot
-        RemainAfterExit=true
-        ExecStart=/bin/sh -c '/opt/bootstrap/layout'
         [Install]
         WantedBy=multi-user.target
 storage:
