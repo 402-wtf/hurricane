@@ -72,7 +72,7 @@ data "template_file" "controller-configs" {
     cluster_domain_suffix  = var.cluster_domain_suffix
     ssh_authorized_key     = var.ssh_authorized_key
     kubeconfig_kubelet     = indent(11, module.bootstrap.kubeconfig-kubelet)
-    assets_bundle          = join("\n", local.assets_bundle)
+    assets_bundle          = indent(11, join("\n", local.assets_bundle))
   }
 }
 
