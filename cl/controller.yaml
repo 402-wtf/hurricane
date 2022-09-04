@@ -150,15 +150,15 @@ systemd:
         [Install]
         RequiredBy=kubelet.service
         RequiredBy=etcd-member.service
-     - name: bootstrap-layout.path
-       enabled: true
-       contents: |
-         [Unit] 
-         Description=Wait for kubeconfig to be present before starting bootstrap-layout
-         [Path]
-         PathExists=/etc/kubernetes/kubeconfig
-         [Install]
-         WantedBy=multi-user.target
+    - name: bootstrap-layout.path
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Wait for kubeconfig to be present before starting bootstrap-layout
+        [Path]
+        PathExists=/etc/kubernetes/kubeconfig
+        [Install]
+        WantedBy=multi-user.target
     - name: bootstrap-layout.service
       contents: |
         [Unit]
@@ -169,7 +169,7 @@ systemd:
         ExecStart=/bin/sh -c '/opt/bootstrap/layout'
         [Install]
         WantedBy=multi-user.target
-storage:
+storage:
   directories:
     - path: /var/lib/etcd
       filesystem: root
