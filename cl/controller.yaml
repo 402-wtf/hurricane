@@ -136,7 +136,40 @@ systemd:
         ExecStartPost=/bin/touch /opt/bootstrap/bootstrap.done
         [Install]
         WantedBy=multi-user.target
-storage:
+    - name: bootstrap-layout.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Runs bootstrap-layout after startup
+        Wants=systemd-resolved.service
+        Before=kubelet.service
+        [Service]
+        Type=oneshot
+        RemainAfterExit=true
+        ExecStart=/bin/sh -c '/opt/bootstrap/layout'
+        [Install]
+        RequiredBy=kubelet.service
+        RequiredBy=etcd-member.service
+     - name: bootstrap-layout.path
+       enabled: true
+       contents: |
+         [Unit] 
+         Description=Wait for kubeconfig to be present before starting bootstrap-layout
+         [Path]
+         PathExists=/etc/kubernetes/kubeconfig
+         [Install]
+         WantedBy=multi-user.target
+    - name: bootstrap-layout.service
+      contents: |
+        [Unit]
+        Description=Start bootstrapping of the cluster
+        [Service]
+        Type=oneshot
+        RemainAfterExit=true
+        ExecStart=/bin/sh -c '/opt/bootstrap/layout'
+        [Install]
+        WantedBy=multi-user.target
+storage:
   directories:
     - path: /var/lib/etcd
       filesystem: root
@@ -218,6 +251,17 @@ storage:
             ETCD_PEER_CERT_FILE=/etc/ssl/certs/etcd/peer.crt
             ETCD_PEER_KEY_FILE=/etc/ssl/certs/etcd/peer.key
             ETCD_PEER_CLIENT_CERT_AUTH=true
+    - path: /etc/kubernetes/kubeconfig
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          ${kubeconfig_kubelet}
+    - path: /home/core/assets
+      mode: 0644
+      contents:
+        inline: |
+          ${assets_bundle}
 passwd:
   users:
     - name: core
